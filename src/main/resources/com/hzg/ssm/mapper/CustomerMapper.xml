@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hzg.ssm.mapper.CustomerMapper">
+    <resultMap id="BaseResultMap" type="com.hzg.ssm.domain.Customer">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="age" property="age" jdbcType="INTEGER"/>
+        <result column="gender" property="gender" jdbcType="INTEGER"/>
+        <result column="tel" property="tel" jdbcType="VARCHAR"/>
+        <result column="qq" property="qq" jdbcType="VARCHAR"/>
+        <result column="input_time" property="inputTime" jdbcType="TIMESTAMP"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <!--<result column="job_id" property="jobId" jdbcType="BIGINT"/>-->
+        <association property="job" javaType="com.hzg.ssm.domain.SystemDictionaryItem" columnPrefix="j_">
+            <result column="id" property="id"/>
+            <result column="title" property="title"/>
+        </association>
+        <association property="source" javaType="com.hzg.ssm.domain.SystemDictionaryItem" columnPrefix="s_">
+            <result column="id" property="id"/>
+            <result column="title" property="title"/>
+        </association>
+        <association property="seller" javaType="com.hzg.ssm.domain.Employee" columnPrefix="e_">
+            <result column="id" property="id"/>
+            <result column="name" property="name"/>
+        </association>
+        <association property="inputUser" javaType="com.hzg.ssm.domain.Employee" columnPrefix="i_">
+            <result column="id" property="id"/>
+            <result column="name" property="name"/>
+        </association>
+        <!--<result column="source_id" property="sourceId" jdbcType="BIGINT"/>-->
+        <!--<result column="seller_id" property="sellerId" jdbcType="BIGINT"/>-->
+        <!--<result column="input_user_id" property="inputUserId" jdbcType="BIGINT" />-->
+
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from customer
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.hzg.ssm.domain.Customer" useGeneratedKeys="true" keyProperty="id">
+        insert into customer (name, age, gender,
+                              tel, qq, job_id, source_id,
+                              seller_id, input_user_id, input_time,
+                              status)
+        values (#{name,jdbcType=VARCHAR}, #{age,jdbcType=INTEGER}, #{gender,jdbcType=INTEGER},
+            #{tel,jdbcType=VARCHAR}, #{qq,jdbcType=VARCHAR}, #{job.id,jdbcType=BIGINT}, #{source.id,jdbcType=BIGINT},
+            #{seller.id,jdbcType=BIGINT}, #{inputUser.id,jdbcType=BIGINT}, #{inputTime,jdbcType=TIMESTAMP},
+            #{status,jdbcType=INTEGER})
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.hzg.ssm.domain.Customer">
+        update customer
+        set name          = #{name,jdbcType=VARCHAR},
+            age           = #{age,jdbcType=INTEGER},
+            gender        = #{gender,jdbcType=INTEGER},
+            tel           = #{tel,jdbcType=VARCHAR},
+            qq            = #{qq,jdbcType=VARCHAR},
+            job_id        = #{job.id,jdbcType=BIGINT},
+            source_id     = #{source.id,jdbcType=BIGINT}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+            id,
+            name,
+            age,
+            gender,
+            tel,
+            qq,
+            job_id,
+            source_id,
+            seller_id,
+            input_user_id,
+            input_time,
+            status
+        from customer
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+            id,
+            name,
+            age,
+            gender,
+            tel,
+            qq,
+            job_id,
+            source_id,
+            seller_id,
+            input_user_id,
+            input_time,
+            status
+        from customer
+    </select>
+    <select id="selectForList" resultMap="BaseResultMap">
+        select
+            c.id,
+            c.name,
+            c.age,
+            c.gender,
+            c.tel,
+            c.qq,
+            c.job_id,
+            c.source_id,
+            c.seller_id,
+            c.input_user_id,
+            c.input_time,
+            c.status,j.id as j_id,j.title as j_title,s.id as s_id,s.title as s_title,
+            e.id as e_id,e.name as e_name,i.id as i_id,i.name as i_name
+        from customer c
+        LEFT JOIN systemdictionaryitem j on j.id=c.job_id
+        LEFT JOIN systemdictionaryitem s on s.id=c.source_id
+        LEFT JOIN employee e on e.id=c.seller_id
+        LEFT JOIN employee i on i.id=c.input_user_id
+        <where>
+            <if test="keyword!=null">
+                (
+                c.name like concat('%',#{keyword},'%')
+                or
+                c.tel like concat('%',#{keyword},'%')
+                )
+            </if>
+            <if test="status > -1">
+            and c.status=#{status}
+            </if>
+            <if test="sellerId > 0">
+             and c.seller_id=#{sellerId}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateSeller">
+      update customer set seller_id=#{id1} where id=#{id}
+    </update>
+    <update id="updateStatus">
+        update customer set status=#{status} where id=#{id}
+    </update>
+</mapper>

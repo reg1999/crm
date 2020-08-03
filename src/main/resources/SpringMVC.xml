@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+
+    <!--注解驱动-->
+    <mvc:annotation-driven/>
+    <!--
+        视图解析器
+        redirect:
+        forward:
+    -->
+    <!--<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        &lt;!&ndash;前缀&ndash;&gt;
+        <property name="prefix" value="/WEB-INF/views/"/>
+        &lt;!&ndash;后缀&ndash;&gt;
+        <property name="suffix" value=".jsp"/>
+    </bean>-->
+    <!--  2. **在mvc.xml 中将MyFreeMarkerConfig 设置成当前环境中使用的freemarker配置对象**
+
+      ```xml-->
+    <bean class="com.hzg.ssm.shiro.MyFreeMarkerConfig">
+        <!-- 配置 freemarker 的文件编码 -->
+        <property name="defaultEncoding" value="UTF-8"/>
+        <!-- 配置 freemarker 寻找模板的路径  -->
+        <property name="templateLoaderPath" value="/WEB-INF/views/"/>
+    </bean>
+<!--    &lt;!&ndash; 注册 FreeMarker 配置类 &ndash;&gt;
+    <bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+        &lt;!&ndash; 配置 FreeMarker 的文件编码 &ndash;&gt;
+        <property name="defaultEncoding" value="UTF-8" />
+        &lt;!&ndash; 配置 FreeMarker 寻找模板的路径 &ndash;&gt;
+        <property name="templateLoaderPath" value="/WEB-INF/views/" />
+    </bean>-->
+
+    <!-- 注册 FreeMarker 视图解析器 -->
+    <bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+        <!-- 是否在 model 自动把 session 中的 attribute 导入进去 -->
+        <property name="exposeSessionAttributes" value="true" />
+        <!-- 配置逻辑视图自动添加的后缀名 -->
+        <property name="suffix" value=".ftl" />
+        <!-- 配置响应头中 Content-Type 的指 -->
+        <property name="contentType" value="text/html;charset=UTF-8" />
+    </bean>
+
+    <import resource="classpath:applicationContex.xml"/>
+    <import resource="classpath:shiro.xml"/>
+    <!--登录拦截器-->
+    <!--<mvc:interceptors>
+        &lt;!&ndash; 配置登录拦截器 &ndash;&gt;
+        <mvc:interceptor>
+            &lt;!&ndash; 对哪些资源起拦截作用 &ndash;&gt;
+            <mvc:mapping path="/**"/>
+            &lt;!&ndash; 对哪些资源不起拦截作用 &ndash;&gt;
+            <mvc:exclude-mapping path="/login.do"/>
+            &lt;!&ndash; <mvc:exclude-mapping path="/login.html"/>
+             <mvc:exclude-mapping path="/js/**"/>
+             <mvc:exclude-mapping path="/css/**"/>&ndash;&gt;
+            &lt;!&ndash; 哪个Bean是拦截器 &ndash;&gt;
+            <bean class="com.hzg.ssm.web.interceptor.CheckLoginInterceptor"/>
+        </mvc:interceptor>
+        &lt;!&ndash; 配置登录拦截器 &ndash;&gt;
+        <mvc:interceptor>
+            &lt;!&ndash; 对哪些资源起拦截作用 &ndash;&gt;
+            <mvc:mapping path="/**"/>
+            &lt;!&ndash; 对哪些资源不起拦截作用 &ndash;&gt;
+            <mvc:exclude-mapping path="/login.do"/>
+            &lt;!&ndash; 哪个Bean是拦截器 &ndash;&gt;
+            <bean class="com.hzg.ssm.web.interceptor.CheckPermissionInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>-->
+
+    <mvc:default-servlet-handler/>
+
+
+    <!--文件上传解析器 id必须是multipartResolver-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!--最大上传文件大小 10M-->
+        <property name="maxUploadSize" value="#{1024*1024*10}"/>
+    </bean>
+</beans>

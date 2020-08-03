@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hzg.ssm.mapper.EmployeeMapper">
+    <resultMap id="BaseResultMap" type="com.hzg.ssm.domain.Employee">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="age" property="age" jdbcType="INTEGER"/>
+        <result column="admin" property="admin" jdbcType="BIT"/>
+        <result column="status" property="status" jdbcType="BIT"/>
+        <!--<result column="dept_id" property="dept_id" jdbcType="BIGINT" />-->
+        <association property="dept" columnPrefix="d_" javaType="com.hzg.ssm.domain.Department">
+            <id column="id" property="id"/>
+            <result column="name" property="name"/>
+            <result column="sn" property="sn"/>
+        </association>
+        <!--角色的集合
+        在属性是集合的时候使用ofType,代表的是集合中的元素的类型
+        在属性是对象的话是JavaType
+        -->
+        <collection property="roles" ofType="com.hzg.ssm.domain.Role" columnPrefix="r_">
+            <result column="id" property="id"/>
+            <result column="name" property="name"/>
+        </collection>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from employee
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.hzg.ssm.domain.Employee" useGeneratedKeys="true" keyProperty="id">
+        insert into employee (name, password, email,
+                              age, admin, dept_id)
+        values (#{name,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR},
+                #{age,jdbcType=INTEGER}, #{admin,jdbcType=BIT}, #{dept.id,jdbcType=BIGINT})
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.hzg.ssm.domain.Employee">
+        update employee
+        set name    = #{name,jdbcType=VARCHAR},
+            email   = #{email,jdbcType=VARCHAR},
+            age     = #{age,jdbcType=INTEGER},
+            admin   = #{admin,jdbcType=BIT},
+            dept_id = #{dept.id,jdbcType=BIGINT}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+            e.id,
+            e.name,
+            e.password,
+            e.age,
+            e.email,
+            e.admin,
+            e.status,
+            d.id   AS d_id,
+            d.name AS d_name,
+            d.sn   AS d_sn,
+            r.id   AS r_id,
+            r.name AS r_name
+        FROM employee e
+            LEFT JOIN department d ON e.dept_id = d.id
+            LEFT JOIN employee_role er ON e.id = er.employee_id
+            LEFT JOIN role r ON er.role_id = r.id
+        WHERE e.id = #{id}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+            id,
+            name,
+            password,
+            email,
+            age,
+            admin,
+            dept_id
+        from employee
+    </select>
+    <!--分页-->
+    <select id="queryCount" resultType="java.lang.Integer">
+        select count(*) from employee e
+        <include refid="SQL_WHERE"/>
+    </select>
+
+    <!---->
+    <select id="queryList" resultMap="BaseResultMap">
+        select e.id, e.name, e.password, e.email, e.age, e.admin,e.status,d.id AS d_id,d.name AS d_name,d.sn AS d_sn
+        from employee e
+        left JOIN department d on e.dept_id=d.id
+        <include refid="SQL_WHERE"/>
+    </select>
+
+
+    <!--SQL_WHERE-->
+    <sql id="SQL_WHERE">
+        <where>
+            <if test="keyword!=null">
+                and (
+                e.name like concat('%',#{keyword},'%')
+                or
+                e.email like concat('%',#{keyword},'%')
+                )
+            </if>
+            <if test="deptId>0">
+                and e.dept_id=${deptId}
+            </if>
+
+        </where>
+    </sql>
+
+    <!--对于角色的保存-->
+    <insert id="insertRelation">
+        insert into employee_role (employee_id, role_id) values (#{employeeId}, #{roleId})
+    </insert>
+    <!--对于中间表之前存在的关系删除-->
+    <delete id="deleteRelation">
+        DELETE from employee_role
+        where employee_id = #{id}
+    </delete>
+
+    <select id="login" resultMap="BaseResultMap">
+        select
+            e.id,
+            e.name,
+            e.password,
+            e.email,
+            e.age,
+            e.admin,
+            e.status,
+            d.id   AS d_id,
+            d.name AS d_name,
+            d.sn   AS d_sn
+        from employee e
+            left JOIN department d on e.dept_id = d.id
+        where e.name = #{username} and e.password = #{password}
+    </select>
+    <!--修改密码-->
+    <update id="updatePassword">
+        update employee
+        set password = #{password,jdbcType=VARCHAR}
+        where id = #{id}
+    </update>
+    <!--修改禁用功能-->
+    <update id="updateStatus">
+        update employee
+        set status = #{status}
+        where id = #{id}
+    </update>
+    <!--判断用户名是否存在-->
+    <!--对于编辑而言-->
+    <select id="selectByName" resultMap="BaseResultMap">
+        select
+            e.id,
+            e.name,
+            e.password,
+            e.email,
+            e.age,
+            e.admin,
+            e.status,
+            d.id   AS d_id,
+            d.name AS d_name,
+            d.sn   AS d_sn
+        from employee e
+            left JOIN department d on e.dept_id = d.id
+        where e.name = #{username}
+    </select>
+
+    <!--查询角色是某个的时候-->
+    <select id="selectByRoleKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT DISTINCT
+            e.id,e.`name`
+        FROM role r
+            JOIN employee_role er ON r.id=er.role_id
+            JOIN employee e ON e.id=er.employee_id
+        WHERE r.id=#{roleId}
+    </select>
+    <!--查询角色是某个的时候按照多个名称-->
+    <select id="selectByRoleSn" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT DISTINCT
+            e.id,e.`name`
+        FROM role r
+            JOIN employee_role er ON r.id=er.role_id
+            JOIN employee e ON e.id=er.employee_id
+        WHERE r.sn in
+        <foreach collection="array" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

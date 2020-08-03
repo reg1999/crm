@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hzg.ssm.mapper.CustomerTransferMapper">
+    <resultMap id="BaseResultMap" type="com.hzg.ssm.domain.CustomerTransfer">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <!--<result column="customer_id" property="customer.id" jdbcType="BIGINT" />-->
+        <!--<result column="operator_id" property="operator.id" jdbcType="BIGINT" />-->
+        <result column="operate_time" property="operateTime" jdbcType="TIMESTAMP"/>
+        <!--<result column="old_seller_id" property="oldSeller.id" jdbcType="BIGINT" />-->
+        <!--<result column="new_seller_id" property="newSeller.id" jdbcType="BIGINT" />-->
+        <result column="reason" property="reason" jdbcType="VARCHAR"/>
+
+        <association property="customer" javaType="com.hzg.ssm.domain.Customer" columnPrefix="c_">
+            <result property="id" column="id"/>
+            <result property="name" column="name"/>
+        </association>
+        <association property="operator" columnPrefix="e_" javaType="com.hzg.ssm.domain.Employee">
+            <result property="id" column="id"/>
+            <result property="name" column="name"/>
+        </association>
+        <association property="oldSeller" columnPrefix="e1_" javaType="com.hzg.ssm.domain.Employee">
+            <result property="id" column="id"/>
+            <result property="name" column="name"/>
+        </association>
+        <association property="newSeller" columnPrefix="e2_" javaType="com.hzg.ssm.domain.Employee">
+            <result property="id" column="id"/>
+            <result property="name" column="name"/>
+        </association>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from customertransfer
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.hzg.ssm.domain.CustomerTransfer" useGeneratedKeys="true" keyProperty="id">
+        insert into customertransfer (customer_id, operator_id, operate_time,
+                                      old_seller_id, new_seller_id, reason
+        )
+        values (#{customer.id,jdbcType=BIGINT}, #{operator.id,jdbcType=BIGINT}, #{operateTime,jdbcType=TIMESTAMP},
+                #{oldSeller.id,jdbcType=BIGINT}, #{newSeller.id,jdbcType=BIGINT}, #{reason,jdbcType=VARCHAR}
+        )
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.hzg.ssm.domain.CustomerTransfer">
+        update customertransfer
+        set customer_id   = #{customer.id,jdbcType=BIGINT},
+            operator_id   = #{operator.id,jdbcType=BIGINT},
+            operate_time  = #{operateTime,jdbcType=TIMESTAMP},
+            old_seller_id = #{oldSeller.id,jdbcType=BIGINT},
+            new_seller_id = #{newSeller.id,jdbcType=BIGINT},
+            reason        = #{reason,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+            id,
+            customer_id,
+            operator_id,
+            operate_time,
+            old_seller_id,
+            new_seller_id,
+            reason
+        from customertransfer
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+            id,
+            customer_id,
+            operator_id,
+            operate_time,
+            old_seller_id,
+            new_seller_id,
+            reason
+        from customertransfer
+    </select>
+    <select id="selectForList" resultMap="BaseResultMap">
+        select
+            ct.id,
+            ct.operate_time,
+            ct.reason,
+            e.id as e_id,
+            e.name as e_name,
+            e1.id as e1_id,e1.name as e1_name,
+            e2.id as e2_id,e2.name as e2_name,
+            c.id as c_id,c.name as c_name
+        from customertransfer ct
+            LEFT JOIN customer c on c.id=ct.customer_id
+            LEFT JOIN employee e on e.id=ct.operator_id
+            LEFT JOIN employee e1 on e1.id=ct.old_seller_id
+            LEFT JOIN employee e2 on e2.id=ct.new_seller_id
+        <where>
+            <if test="keyword!=null">
+                and c.name like concat('%',#{keyword},'%')
+            </if>
+        </where>
+    </select>
+</mapper>

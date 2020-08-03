@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+    <!--在xml配置shiroFilter ,好处可以方法设置不同类型的属性,如果在web.xml中配置String类型比较方便,但是bean对象那些比较麻烦-->
+    <bean id="shiroFilter"  class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!--引用指定的安全管理器-->
+        <property name="securityManager" ref="securityManager"/>
+        <!--shiro默认的登录地址是/login.jsp 现在要指定我们自己的登录页面地址-->
+        <property name="loginUrl" value="/login.html"/>
+        <!--路径对应的规则-->
+        <property name="filterChainDefinitions">
+            <value>
+                /login.do=anon
+                /logout.do=logout
+                /css/**=anon
+                /js/**=anon
+                /**=authc
+            </value>
+        </property>
+    </bean>
+    <!--web环境使用的安全管理器-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="crmRealm"/>  <!--realm中贴@Component注解-->
+        <!--注册缓存管理器-->
+        <property name="cacheManager" ref="cacheManager"/>
+    </bean>
+    <!--方法二-->
+    <!--<bean id="crmRealm" class="com.hzg.ssm.shiro.CrmRealm"></bean>-->
+<!--开启 Shiro 注解扫描器-->
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>
+    <!--初始化app通知器所依赖的组件，配了aop:config后AuthorizationAttributeSourceAdvisor才会生效-->
+    <aop:config/>
+    <!--指定当前需要使用的凭证匹配器-->
+<!--    <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+        &lt;!&ndash; 指定加密算法 &ndash;&gt;
+        <property name="hashAlgorithmName" value="MD5"/>
+    </bean>-->
+    <!-- 缓存管理器 -->
+    <bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <!-- 设置配置文件 -->
+        <property name="cacheManagerConfigFile" value="classpath:shiro-ehcache.xml"/>
+    </bean>
+</beans>

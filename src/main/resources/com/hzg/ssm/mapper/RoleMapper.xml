@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hzg.ssm.mapper.RoleMapper" >
+  <resultMap id="BaseResultMap" type="com.hzg.ssm.domain.Role" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="sn" property="sn" jdbcType="VARCHAR" />
+    <collection property="permissions" columnPrefix="p_" ofType="com.hzg.ssm.domain.Permission">
+      <result column="id" property="id"></result>
+      <result column="name" property="name"></result>
+    </collection>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from role
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <insert id="insert" parameterType="com.hzg.ssm.domain.Role" useGeneratedKeys="true" keyProperty="id" >
+    insert into role (name, sn)
+    values (#{name,jdbcType=VARCHAR}, #{sn,jdbcType=VARCHAR})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.hzg.ssm.domain.Role" >
+    update role
+    set name = #{name,jdbcType=VARCHAR},
+      sn = #{sn,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select r.id, r.name, r.sn,p.id as p_id,p.name as p_name
+    from role r
+      left join role_permission rp on r.id=rp.role_id
+      left join permission p on p.id=rp.permission_id
+    where r.id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, name, sn
+    from role
+  </select>
+    <select id="queryCount" resultType="java.lang.Integer">
+      select count(*)
+      from role
+    </select>
+  <select id="queryList" resultMap="BaseResultMap">
+    select id, name, sn
+    from role
+  </select>
+
+    <!---->
+  <insert id="insertRelation">
+  insert into  role_permission(role_id, permission_id) VALUES (#{roleId},#{permissionId})
+  </insert>
+  <delete id="deleteRelation">
+    DELETE  from role_permission where role_id=#{id}
+  </delete>
+  <!--查询该员工的所有的角色-->
+  <select id="selectSnByEmpId" resultType="java.lang.String">
+    select r.sn from employee_role er
+    join role r on r.id=er.role_id
+    where er.employee_id=#{employeeId}
+  </select>
+</mapper>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>叩丁狼客户关系管理系统-登录</title>
+    <link rel="stylesheet" href="/js/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="/js/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/js/Ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="/js/adminlte/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="/js/adminlte/css/skins/_all-skins.min.css">
+    <link rel="stylesheet" href="/js/adminlte/css/fonts.googleapis.com.css">
+    <link rel="shortcut icon" href="http://localhost:81/favicon.ico"/>
+
+    <script src="/js/jquery/jquery.min.js"></script>
+    <script src="/js/bootstrap/js/bootstrap.js"></script>
+    <script src="/js/adminlte/js/adminlte.min.js"></script>
+    <script src="/js/plugins/twbsPagination/jquery.twbsPagination.min.js"></script>
+    <script src="/js/plugins/messager/jquery.bootstrap.min.js"></script>
+    <!--jQueryForm表单  自身嗲有异步请求-->
+    <script src="/js/plugins/jquery-form/jquery.form.js"></script>
+
+    <script>
+        $(function () {
+            $('.submitBtn').click(function () {
+                console.log(1);
+               /* var param=$('#loginForm').serialize();
+                //serialize方法可以把表单的所有参数都获取出来,使用&拼接
+                //不能够使用login,因为先匹配映射 再匹配静态资源的
+                $.post('/login.do',param,function (data) {
+                    if(data.success){
+                        window.location.href = "/employee/list.do";
+                    }else{
+                        $.messager.popup(data.msg)
+                    }
+                })*/
+                $('#loginForm').ajaxSubmit(function (data) {
+                    if(data.success){
+                        window.location.href = "/employee/list.do";
+                    }else{
+                        $.messager.popup(data.msg)
+                    }
+
+                })
+            })
+        })
+    </script>
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+    <div class="login-logo">
+        <a href="http://www.wolfcode.cn"><b>叩丁狼</b>CRM</a>
+    </div>
+    <div class="login-box-body">
+        <p class="login-box-msg">请输入账号密码</p>
+
+        <form method="post" id="loginForm" action="/login.do">
+            <div class="form-group has-feedback">
+                <input type="text" class="form-control" placeholder="请输入账号" name="username" value="卓哥">
+                <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+            </div>
+            <div class="form-group has-feedback">
+                <input type="password" class="form-control" placeholder="请输入密码" name="password" value="1">
+                <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+            </div>
+            <div class="row">
+                <div class="col-xs-4">
+                    <!--在html页面中里面的from表单中 button的type默认是submit-->
+                    <button type="button" class="btn btn-primary btn-block btn-flat submitBtn">登录</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

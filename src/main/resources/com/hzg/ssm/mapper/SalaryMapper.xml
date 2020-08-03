@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hzg.ssm.mapper.SalaryMapper" >
+  <resultMap id="BaseResultMap" type="com.hzg.ssm.domain.Salary" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="money" property="money" jdbcType="DECIMAL" />
+    <result column="year" property="year" jdbcType="INTEGER" />
+    <result column="month" property="month" jdbcType="INTEGER" />
+    <!--<result column="employee_id" property="employeeId" jdbcType="BIGINT" />-->
+    <association property="employee" columnPrefix="e_" javaType="com.hzg.ssm.domain.Employee">
+      <result property="id" column="id"/>
+      <result property="name" column="name"/>
+    </association>
+    <!--<result column="payout_id" property="payoutId" jdbcType="BIGINT" />-->
+    <association property="systemDictionaryItem" columnPrefix="si_" javaType="com.hzg.ssm.domain.SystemDictionaryItem">
+      <result property="id" column="id"/>
+      <result property="title" column="title"/>
+      <result property="parentId" column="parentId"/>
+    </association>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from salary
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.hzg.ssm.domain.Salary" useGeneratedKeys="true" keyProperty="id" >
+    insert into salary (money, year, month, 
+      employee_id, payout_id)
+    values (#{money,jdbcType=DECIMAL}, #{year,jdbcType=INTEGER}, #{month,jdbcType=INTEGER}, 
+      #{employee.id,jdbcType=BIGINT}, #{systemDictionaryItem.id,jdbcType=BIGINT})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.hzg.ssm.domain.Salary" >
+    update salary
+    set money = #{money,jdbcType=DECIMAL},
+      year = #{year,jdbcType=INTEGER},
+      month = #{month,jdbcType=INTEGER},
+      employee_id = #{employee.id,jdbcType=BIGINT},
+      payout_id = #{systemDictionaryItem.id,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    SELECT s.id,s.year,s.month,s.money,e.id as e_id,e.name as e_name,si.id as si_id,si.parent_id as si_parentId,si.title AS si_title FROM salary s
+      JOIN employee e ON e.id=s.employee_id
+      JOIN systemdictionaryitem si ON si.id=s.payout_id
+    where s.id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, money, year, month, employee_id, payout_id
+    from salary
+  </select>
+    <select id="selectForList" resultMap="BaseResultMap">
+      SELECT s.id,s.year,s.month,s.money,e.id as e_id,e.name as e_name,si.id as si_id,si.parent_id as si_parentId,si.title AS si_title FROM salary s
+        JOIN employee e ON e.id=s.employee_id
+        JOIN systemdictionaryitem si ON si.id=s.payout_id
+      <where>
+        <if test="keyword!=null">
+          and e.name like concat('%',#{keyword},'%')
+        </if>
+        <if test="systemDictionaryItemId>0">
+          and s.payout_id=#{systemDictionaryItemId}
+        </if>
+      </where>
+    </select>
+</mapper>
