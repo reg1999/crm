@@ -11,7 +11,7 @@
     <!--spring统一依赖-->
     <properties>
         <spring.version>5.0.8.RELEASE</spring.version>
-        <shiro.version>1.5.2</shiro.version>
+        <shiro.version>1.10.0</shiro.version>
     </properties>
     <!--添加依赖-->
     <dependencies>
@@ -115,7 +115,7 @@
         <dependency>
             <groupId>org.apache.shiro</groupId>
             <artifactId>shiro-core</artifactId>
-            <version>1.5.2</version>
+            <version>1.10.0</version>
         </dependency>
         <!--mvc-->
         <dependency>
